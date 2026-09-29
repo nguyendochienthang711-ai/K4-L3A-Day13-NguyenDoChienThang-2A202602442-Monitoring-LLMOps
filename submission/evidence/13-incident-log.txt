@@ -1,0 +1,54 @@
+================================================================================
+EVIDENCE 13: INCIDENT LOG LINE (CHALLENGE INVESTIGATION)
+================================================================================
+
+Challenge ID: day13-k4-l3a-monitoring-llmops-v1
+Affected Feature: monitoring
+Correlation ID: req-d7398858
+
+Request Log:
+{
+  "service": "api",
+  "event": "request_received",
+  "correlation_id": "req-d7398858",
+  "session_id": "k4-l3a-challenge-s02",
+  "user_id_hash": "aae0b94055a9",
+  "feature": "monitoring",
+  "model": "claude-sonnet-4-5",
+  "env": "dev",
+  "level": "info",
+  "ts": "2026-09-29T11:14:41.274170Z",
+  "payload": {
+    "message_preview": "How should an engineer investigate tail latency?"
+  }
+}
+
+Response Log:
+{
+  "service": "api",
+  "event": "response_sent",
+  "correlation_id": "req-d7398858",
+  "session_id": "k4-l3a-challenge-s02",
+  "user_id_hash": "aae0b94055a9",
+  "feature": "monitoring",
+  "model": "claude-sonnet-4-5",
+  "env": "dev",
+  "level": "info",
+  "ts": "2026-09-29T11:14:44.736360Z",
+  "latency_ms": 3378,
+  "ttft_ms": 50,
+  "tokens_in": 34,
+  "tokens_out": 169,
+  "cost_usd": 0.002637,
+  "quality_score": 0.9,
+  "tool_name": "retrieval",
+  "tool_success": true,
+  "payload": {
+    "answer_preview": "Starter answer. You should improve this output logic and add better quality chec..."
+  }
+}
+
+Observation:
+Latency spiked to 3,378ms (normal baseline was ~170ms), violating the 3,000ms SLO threshold.
+Matched Trace ID on Langfuse: 07a36fdbf3d0c3d5ab990a7ebafabe71
+Root Cause: Retrieval span took 2.501s out of 3.379s total duration.

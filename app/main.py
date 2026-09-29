@@ -14,7 +14,7 @@ from .metrics import record_error, snapshot
 from .middleware import CorrelationIdMiddleware
 from .pii import hash_user_id, summarize_text
 from .schemas import ChatRequest, ChatResponse
-from .tracing import tracing_enabled
+from .tracing import get_langfuse_client, tracing_enabled
 
 configure_logging()
 log = get_logger()
@@ -48,8 +48,13 @@ async def metrics() -> dict:
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: Request, body: ChatRequest) -> ChatResponse:
-    # TODO: Enrich logs with request context (user_id_hash, session_id, feature, model, env)
-    # bind_contextvars(...)
+    bind_contextvars(
+        user_id_hash=hash_user_id(body.user_id),
+        session_id=body.session_id,
+        feature=body.feature,
+        model=agent.model,
+        env=os.getenv("APP_ENV", "dev"),
+    )
     
     log.info(
         "request_received",
@@ -77,7 +82,7 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
             tool_success=True,
             payload={"answer_preview": summarize_text(result.answer)},
         )
-        return ChatResponse(
+        res = ChatResponse(
             answer=result.answer,
             correlation_id=request.state.correlation_id,
             latency_ms=result.latency_ms,
@@ -87,6 +92,9 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
             cost_usd=result.cost_usd,
             quality_score=result.quality_score,
         )
+        if tracing_enabled():
+            get_langfuse_client().flush()
+        return res
     except Exception as exc:  # pragma: no cover
         error_type = type(exc).__name__
         record_error(error_type)
