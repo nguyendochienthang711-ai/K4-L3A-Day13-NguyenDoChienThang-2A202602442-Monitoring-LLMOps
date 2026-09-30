@@ -117,7 +117,7 @@ class LabAgent:
         return retrieve(message)
 
     @observe(name="llm-generation", as_type="generation", capture_input=False, capture_output=False)
-    def _generate(self, prompt: Any) -> Any:
+    def _generate(self, prompt: any) -> any:
         with propagate_attributes(prompt=prompt.managed_prompt):
             response = self.llm.generate(prompt.text)
         cost = self._estimate_cost(response.usage.input_tokens, response.usage.output_tokens)
